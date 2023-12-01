@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="things.hpp" />
+    <ClCompile Include="uefi.cpp">
+      <Filter>uefi</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="hook.cpp">
+      <Filter>hook</Filter>
+    </ClCompile>
+    <ClCompile Include="loader.cpp">
+      <Filter>loader</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="uefi">
+      <UniqueIdentifier>{730bf349-f2a6-4c87-8ead-a88400868a8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{48735910-a9b0-404b-9785-21653d11b73e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hook">
+      <UniqueIdentifier>{e7b5bef5-8133-495f-8813-14f761b1912f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="loader">
+      <UniqueIdentifier>{943f10c1-e8fa-4dbe-b5a2-d8b0146a45ff}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="uefi.hpp">
+      <Filter>uefi</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="hook.hpp">
+      <Filter>hook</Filter>
+    </ClInclude>
+    <ClInclude Include="loader.hpp">
+      <Filter>loader</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
