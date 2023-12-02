@@ -50,12 +50,11 @@ void OslArchTransferToKernelHook(PLOADER_PARAMETER_BLOCK LoaderBlock, void* Kern
 	if (MmLoadSystemImage == nullptr)
 		return OslArchTransferToKernelOriginal(LoaderBlock, KernelEntrypoint);
 
-	// Searching for nt!PsLoadedModuleList
-	PsLoadedModuleList = (LIST_ENTRY*)Utils::SignatureScan(Ntoskrnl->DllBase,
-		"\x48\x8B\x15\x00\x00\x00\x00\x48\x85\xD2\x74\x28", "xxx????xxxxx", 12, Ntoskrnl->SizeOfImage);
-	if (PsLoadedModuleList == nullptr)
+	// Searching for nt!KdVersionBlock
+	KdVersionBlock = (PDBGKD_GET_VERSION64)Utils::SignatureScan(Ntoskrnl->DllBase,
+		"\x00\x00\x00\x00\x06\x02\x46\x00\x64\x86", "xxxxxxxxxx", 10, Ntoskrnl->SizeOfImage);
+	if (KdVersionBlock == nullptr)
 		return OslArchTransferToKernelOriginal(LoaderBlock, KernelEntrypoint);
-	PsLoadedModuleList = (LIST_ENTRY*)((UINT64)PsLoadedModuleList + *(INT32*)((UINT64)PsLoadedModuleList + 3) + 7);
 
 	// Searching for nt!PspNotifyEnableMask
 	PspNotifyEnableMask = (UINT32*)Utils::SignatureScan(Ntoskrnl->DllBase, 

@@ -6,7 +6,7 @@ typedef NTSTATUS(*tMmLoadSystemImage)(PUNICODE_STRING FileName, PUNICODE_STRING 
 extern tMmLoadSystemImage MmLoadSystemImage;
 
 extern UINT32* PspNotifyEnableMask;
-extern LIST_ENTRY* PsLoadedModuleList;
+extern PDBGKD_GET_VERSION64 KdVersionBlock;
 extern void* SeValidateImageHeader,
 	*KeInitAmd64SpecificState,
 	*ExpLicenseWatchInitWorker;

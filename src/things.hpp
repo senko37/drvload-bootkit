@@ -66,6 +66,23 @@ typedef struct _LDR_DATA_TABLE_ENTRY {
     struct _UNICODE_STRING BaseDllName;
 } LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
 
+typedef struct _DBGKD_GET_VERSION64 {
+    USHORT MajorVersion;
+    USHORT MinorVersion;
+    CHAR ProtocolVersion;
+    CHAR KdSecondaryVersion;
+    USHORT Flags;
+    USHORT MachineType;
+    CHAR MaxPacketType;
+    CHAR MaxStateChange;
+    CHAR MaxManipulate;
+    CHAR Simulation;
+    USHORT Unused[1];
+    UINT64 KernBase;
+    _LIST_ENTRY* PsLoadedModuleList;
+    UINT64 DebuggerDataList;
+} DBGKD_GET_VERSION64, *PDBGKD_GET_VERSION64;
+
 typedef struct _IMAGE_DOS_HEADER {
     USHORT e_magic;
     USHORT e_cblp;
