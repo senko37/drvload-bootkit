@@ -31,7 +31,7 @@ NTSTATUS Loader::LoadDriver() {
 				break;
 			}
 			Module = (PLDR_DATA_TABLE_ENTRY)Module->InLoadOrderLinks.Flink;
-		} while (Module != (PLDR_DATA_TABLE_ENTRY)KdVersionBlock->PsLoadedModuleList->Flink || Module != nullptr);
+		} while (Module != (PLDR_DATA_TABLE_ENTRY)KdVersionBlock->PsLoadedModuleList->Flink);
 
 		if (LoadedDriver) {
 			// Removing driver from PsLoadedModuleList
