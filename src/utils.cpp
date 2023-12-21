@@ -43,7 +43,7 @@ void Utils::MemSet(void* Dest, CHAR Value, UINT32 Size, bool DisableProtect) {
 }
 
 void* Utils::SignatureScan(void* Mem, const char* Pattern, const char* Mask, UINT32 Size, UINT32 Limit) {
-	for (UINT32 i = 0; i < Limit; i++) {
+	for (UINT32 i = 0; i < Limit - Size; i++) {
 		for (UINT32 a = 0; a < Size; a++) {
 			if (Mask[a] == '?' || ((char*)Mem)[i + a] == Pattern[a]) {
 				if (a == Size - 1)
