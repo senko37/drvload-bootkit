@@ -1,18 +1,41 @@
 #include "loader.hpp"
-#include "hook.hpp"
+#include "hooks.hpp"
 #include "utils.hpp"
 
-UNICODE_STRING ImagePath = RTL_CONSTANT_STRING(L"\\DosDevices\\C:\\test.sys");
+static UNICODE_STRING ImagePath = RTL_CONSTANT_STRING(L"\\DosDevices\\C:\\test.sys");
 
-tMmLoadSystemImage MmLoadSystemImage;
+static tMmLoadSystemImage MmLoadSystemImage;
+static UINT32* PspNotifyEnableMask;
+static PDBGKD_GET_VERSION64 KdVersionBlock;
+static void* SeValidateImageHeader;
 
-UINT32* PspNotifyEnableMask;
-PDBGKD_GET_VERSION64 KdVersionBlock;
-void* SeValidateImageHeader,
-	*KeInitAmd64SpecificState,
-	*ExpLicenseWatchInitWorker;
+bool Loader::LoadDriver(PLDR_DATA_TABLE_ENTRY Ntoskrnl) {
+	// Searching for nt!MmLoadSystemImage
+	MmLoadSystemImage = (tMmLoadSystemImage)Utils::SignatureScan(Ntoskrnl->DllBase,
+		"\x48\x83\xEC\x48\x41\xF7\xC1", "xxxxxxx", 7, Ntoskrnl->SizeOfImage);
+	if (MmLoadSystemImage == nullptr)
+		return false;
 
-NTSTATUS Loader::LoadDriver() {
+	// Searching for nt!KdVersionBlock
+	KdVersionBlock = (PDBGKD_GET_VERSION64)Utils::SignatureScan(Ntoskrnl->DllBase,
+		"\x00\x00\x00\x00\x06\x02\x46\x00\x64\x86", "xxxxxxxxxx", 10, Ntoskrnl->SizeOfImage);
+	if (KdVersionBlock == nullptr)
+		return false;
+
+	// Searching for nt!PspNotifyEnableMask
+	PspNotifyEnableMask = (UINT32*)Utils::SignatureScan(Ntoskrnl->DllBase,
+		"\xF0\x0F\xBA\x2D\x00\x00\x00\x00\x00\x33\xDB", "xxxx?????xx", 11, Ntoskrnl->SizeOfImage);
+	if (PspNotifyEnableMask == nullptr)
+		return false;
+	PspNotifyEnableMask = (UINT32*)((UINT64)PspNotifyEnableMask + *(INT32*)((UINT64)PspNotifyEnableMask + 4) + 9);
+
+	// Searching for nt!SeValidateImageHeader
+	SeValidateImageHeader = Utils::SignatureScan(Ntoskrnl->DllBase,
+		"\x48\x81\xEC\x00\x00\x00\x00\x33\xF6\x48\x8B\xDA", "xxx????xxxxx", 12, Ntoskrnl->SizeOfImage);
+	if (SeValidateImageHeader == nullptr)
+		return false;
+	SeValidateImageHeader = (void*)((UINT64)SeValidateImageHeader - 12);
+
 	// Patching nt!SeValidateImageHeader
 	Utils::MemCpy(SeValidateImageHeader, (void*)"\x48\x31\xC0\xC3", 4); // xor rax, rax; ret
 
@@ -24,7 +47,9 @@ NTSTATUS Loader::LoadDriver() {
 	void* ModuleObject, *ImageBaseAddress;
 	NTSTATUS Status = MmLoadSystemImage(&ImagePath, 0, 0, 0, &ModuleObject, &ImageBaseAddress);
 	if (Status == STATUS_SUCCESS) {
-		PLDR_DATA_TABLE_ENTRY LoadedDriver = nullptr, Module = (PLDR_DATA_TABLE_ENTRY)KdVersionBlock->PsLoadedModuleList->Flink;
+		PLDR_DATA_TABLE_ENTRY Module = (PLDR_DATA_TABLE_ENTRY)KdVersionBlock->PsLoadedModuleList->Flink;
+
+		PLDR_DATA_TABLE_ENTRY LoadedDriver = nullptr;
 		do {
 			if (Module->DllBase == ImageBaseAddress) {
 				LoadedDriver = Module;
@@ -47,9 +72,6 @@ NTSTATUS Loader::LoadDriver() {
 
 			tDriverEntry DriverEntry = (tDriverEntry)((UINT64)LoadedDriver->DllBase + Nt->OptionalHeader.AddressOfEntryPoint);
 			Status = DriverEntry(nullptr, nullptr);
-
-			// Erasing PE header
-			//Utils::MemSet(LoadedDriver->DllBase, 0, 0x1000);
 		}
 	}
 
@@ -59,5 +81,5 @@ NTSTATUS Loader::LoadDriver() {
 	// Restoring original bytes
 	Utils::MemCpy(SeValidateImageHeader, (void*)"\x48\x8B\xC4\x48", 4);
 
-	return Status;
+	return Status == STATUS_SUCCESS;
 }

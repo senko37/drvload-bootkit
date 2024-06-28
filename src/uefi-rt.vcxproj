@@ -41,7 +41,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NODEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
@@ -66,15 +66,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="hook.cpp" />
+    <ClCompile Include="hooks.cpp" />
     <ClCompile Include="loader.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="things.hpp" />
+    <ClCompile Include="defines.hpp" />
     <ClCompile Include="uefi.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="hook.hpp" />
+    <ClInclude Include="hooks.hpp" />
     <ClInclude Include="loader.hpp" />
     <ClInclude Include="uefi.hpp" />
     <ClInclude Include="utils.hpp" />

@@ -1,6 +1,5 @@
 #include "utils.hpp"
-#include "things.hpp"
-#include <intrin.h>
+#include "defines.hpp"
 
 void Utils::MemCpy(void* Dest, void* Src, UINT32 Size, bool DisableProtect) {
 	UINT64 Cr0, Cr4;
@@ -22,7 +21,7 @@ void Utils::MemCpy(void* Dest, void* Src, UINT32 Size, bool DisableProtect) {
 	}
 }
 
-void Utils::MemSet(void* Dest, CHAR Value, UINT32 Size, bool DisableProtect) {
+void Utils::MemSet(void* Dest, char Value, UINT32 Size, bool DisableProtect) {
 	UINT64 Cr0, Cr4;
 	if (DisableProtect) {
 		Cr0 = __readcr0();

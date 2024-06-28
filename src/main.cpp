@@ -1,12 +1,12 @@
 #include "uefi.hpp"
-#include "hook.hpp"
+#include "hooks.hpp"
 #include "utils.hpp"
-#include "things.hpp"
-#include <intrin.h>
+#include "defines.hpp"
 
-void* Winload;
+static EFI_EXIT_BOOT_SERVICES ExitBootServicesOriginal;
+static EFI_EVENT EventSetVirtualAddressMap;
+static void* Winload;
 
-EFI_EVENT EventSetVirtualAddressMap;
 void EFIAPI NotifySetVirtualAddressMap(
 	IN EFI_EVENT Event,
 	IN void* Context
@@ -16,8 +16,8 @@ void EFIAPI NotifySetVirtualAddressMap(
 	g_ST->RuntimeServices->ConvertPointer(EFI_OPTIONAL_PTR, (void**)&g_ST);
 };
 
-EFI_EXIT_BOOT_SERVICES ExitBootServicesOriginal;
-EFI_STATUS ExitBootServicesHook(
+
+EFI_STATUS EFIAPI ExitBootServicesHook(
 	IN EFI_HANDLE ImageHandle,
 	IN UINTN MapKey
 ) {
@@ -27,16 +27,17 @@ EFI_STATUS ExitBootServicesHook(
 	return g_ST->BootServices->ExitBootServices(ImageHandle, MapKey);
 }
 
-EFI_STATUS UefiMain(
+EFI_STATUS EFIAPI UefiMain(
 	IN EFI_HANDLE ImageHandle,
 	IN EFI_SYSTEM_TABLE* SystemTable
 ) {
 	g_ST = SystemTable;
 
-	ExitBootServicesOriginal = g_ST->BootServices->ExitBootServices;
-	g_ST->BootServices->ExitBootServices = ExitBootServicesHook;
-
 	EFI_STATUS Status = g_ST->BootServices->CreateEvent(EVT_SIGNAL_VIRTUAL_ADDRESS_CHANGE, TPL_NOTIFY, NotifySetVirtualAddressMap, NULL, &EventSetVirtualAddressMap);
+	if (Status == EFI_SUCCESS) {
+		ExitBootServicesOriginal = g_ST->BootServices->ExitBootServices;
+		g_ST->BootServices->ExitBootServices = ExitBootServicesHook;
+	}
 
 	return Status;
 }
